@@ -30,7 +30,7 @@ def get_api(url):
 def get_data():
     #wardah
     offset = 0
-    ratings = 4
+    ratings = 5
     date_now = datetime.datetime.now().date()
     final_res = []
     status = True
