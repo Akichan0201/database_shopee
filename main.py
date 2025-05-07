@@ -30,7 +30,7 @@ def get_api(url):
 def get_data():
     #wardah
     offset = 0
-    ratings = 5
+    ratings = 4
     date_now = datetime.datetime.now().date()
     final_res = []
     status = True
@@ -40,7 +40,10 @@ def get_data():
         # api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=59763733&type={ratings}&userid=59765167')
 
         #glad2glow
-        api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=809769142&type={ratings}&userid=809755351')
+        # api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=809769142&type={ratings}&userid=809755351')
+
+        #emina
+        api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=63983008&type={ratings}&userid=63984451')
         # validate
         try:
             for i in api['data']['items']: 
@@ -72,6 +75,7 @@ def main():
     data_json = get_data()
     data_wardah = []
     data_glad2glow = []
+    data_emina = []
     
     for i in data_json:
 
@@ -86,17 +90,15 @@ def main():
             i['product_items'][0]['name']
         )
         
-    #     data_wardah.append(product)
-    # return data_wardah
-        data_glad2glow.append(product)
-    return data_glad2glow
+        data_emina.append(product)
+    return data_emina
 
 if __name__ == '__main__':
     # print(get_data())
-    glad2glow = main() # list of object
-    glad2glow = [asdict(item) for item in glad2glow]
-    df = pd.DataFrame(glad2glow)
-    conn = sqlite3.connect('product_glad2glow.db')
-    df.to_sql('product_glad2glow', conn, if_exists='append', index=False)
-    print(glad2glow)
+    emina = main() # list of object
+    emina = [asdict(item) for item in emina]
+    df = pd.DataFrame(emina)
+    conn = sqlite3.connect('product_emina.db')
+    df.to_sql('product_emina', conn, if_exists='append', index=False)
+    print(emina)
 #https://baeftv87f5bqkgx2.canva-hosted-embed.com/codelet/AAEAEGJhZWZ0djg3ZjVicWtneDIAAAAAAZaVkH9gtCBPwc6QQA5Q2ykWk-AHnA73nHl4TMt4f0wMhvJ6iro/
