@@ -1,10 +1,15 @@
 import requests
 import datetime
+import schedule
 import time
 import sqlite3
 import pandas as pd
+import logging
 
 from dataclasses import dataclass, asdict
+
+
+date_now = str(datetime.datetime.now().date())
 
 @dataclass
 class Product():
@@ -19,63 +24,86 @@ class Product():
 
 
 def get_api(url):
+    print(url)
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
     } 
     response = requests.get(url, headers=headers)
-    print(response.status_code)
-    # print(response.json())
+    response.raise_for_status()
     return response.json()
 
 def get_data():
-    #wardah
+
+    final_data = []
+    # list of shop id
+    shop_id = ['59763733', '809769142', '63983008']
+    ratings = [i for i in range(1, 6)] #[1,2,3,4,5]
+    for shop in shop_id:
+        for rate in ratings:
+            data_per_rating = get_rating(shop, rate)
+            final_data.extend(data_per_rating)
+            logging.info(f'Get data for rating {rate}')
+    return final_data
+
+
+def get_rating(shop_id, ratings):
     offset = 0
-    ratings = 5
-    date_now = datetime.datetime.now().date()
+    limit = 6
+    
     final_res = []
     status = True
+
+    base_url = "https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?"
     
     while status:
-        #wardah
-        # api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=59763733&type={ratings}&userid=59765167')
-
-        #glad2glow
-        # api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=809769142&type={ratings}&userid=809755351')
-
-        #emina
-        api = get_api(f'https://shopee.co.id/api/v4/seller_operation/get_shop_ratings_new?limit=6&offset={offset}&shopid=63983008&type={ratings}&userid=63984451')
+        api = get_api(f'{base_url}limit={limit}&offset={offset}&shopid={shop_id}&type={ratings}&userid=63984451')
         # validate
         try:
-            for i in api['data']['items']: 
-                #datetime     
-                date = i['mtime']
-                dt = datetime.date.fromtimestamp(date)
-                print(f"item date:{dt}, today:{date_now}")
-                i['mtime'] = str(dt)
+            data = collect_data(api) 
+            final_res.extend(data)
 
-                if dt == date_now:
-                    final_res.append(i)
-                    print(len(final_res))
-                else:
-                    print(dt == date_now)
-                    status = False
-            
             time.sleep(2)
             offset += 6
             print('Offset:', offset)
 
-            if offset > 12:
+            if offset > 6:
                 status = False
         except:
             print('no data')
             status = False
     return final_res
 
+def unix_converter(mtime):
+    try:
+        dt = str(datetime.date.fromtimestamp(mtime))
+        return dt
+    except Exception as e:
+        raise ValueError("Cant convert to datetime", e)
+    
+def collect_data(response_api):
+
+    collected_data = []
+    for i in response_api['data']['items']: 
+        
+        # Replace unix time to more readable format
+        mtime = i['mtime']
+        dt = unix_converter(mtime)
+        i['mtime'] = dt
+
+        if dt == date_now:
+            collected_data.append(i)
+            print(len(collected_data))
+            
+        else:
+            print(dt, date_now)
+            
+    return collected_data
+    
+
 def main():
+    
     data_json = get_data()
-    data_wardah = []
-    data_glad2glow = []
-    data_emina = []
+    data_shop = []
     
     for i in data_json:
 
@@ -90,15 +118,18 @@ def main():
             i['product_items'][0]['name']
         )
         
-        data_emina.append(product)
-    return data_emina
+        data_shop.append(product)
+    return data_shop
 
 if __name__ == '__main__':
     # print(get_data())
-    emina = main() # list of object
-    emina = [asdict(item) for item in emina]
-    df = pd.DataFrame(emina)
-    conn = sqlite3.connect('product_emina.db')
-    df.to_sql('product_emina', conn, if_exists='append', index=False)
-    print(emina)
-#https://baeftv87f5bqkgx2.canva-hosted-embed.com/codelet/AAEAEGJhZWZ0djg3ZjVicWtneDIAAAAAAZaVkH9gtCBPwc6QQA5Q2ykWk-AHnA73nHl4TMt4f0wMhvJ6iro/
+    shopee = main() # list of object
+    shopee = [asdict(item) for item in shopee]
+    # schedule.every(5).minutes.do(main)
+    df = pd.DataFrame(shopee)
+    conn = sqlite3.connect('shopee.db')
+    df.to_sql('shopee', conn, if_exists='append', index=False)
+
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
