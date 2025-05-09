@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+print("Hello World")
 logging.basicConfig(filename='log.log', level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
 
 def date():
