@@ -8,7 +8,7 @@ import logging
 
 from dataclasses import dataclass, asdict
 
-
+logging.basicConfig(filename='main.log', level=logging.WARNING, format='%(asctime)s %(levelname)s:%(message)s')
 date_now = str(datetime.datetime.now().date())
 
 @dataclass
@@ -29,7 +29,11 @@ def get_api(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
     } 
     response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        logging.info(f'Get url from api {url}')
+
     response.raise_for_status()
+    logging.info('Get data success')
     return response.json()
 
 def get_data():
@@ -66,10 +70,11 @@ def get_rating(shop_id, ratings):
             offset += 6
             print('Offset:', offset)
 
-            if offset > 6:
+            # DELETE FOR PROD
+            if offset > 12:
                 status = False
         except:
-            print('no data')
+            logging.info('No data')
             status = False
     return final_res
 
@@ -78,6 +83,7 @@ def unix_converter(mtime):
         dt = str(datetime.date.fromtimestamp(mtime))
         return dt
     except Exception as e:
+        logging.error(e)
         raise ValueError("Cant convert to datetime", e)
     
 def collect_data(response_api):
@@ -92,7 +98,7 @@ def collect_data(response_api):
 
         if dt == date_now:
             collected_data.append(i)
-            print(len(collected_data))
+            logging.INFO(len(collected_data))
             
         else:
             print(dt, date_now)
@@ -121,15 +127,23 @@ def main():
         data_shop.append(product)
     return data_shop
 
-if __name__ == '__main__':
-    # print(get_data())
+def export_data():
+    
     shopee = main() # list of object
     shopee = [asdict(item) for item in shopee]
-    # schedule.every(5).minutes.do(main)
+
     df = pd.DataFrame(shopee)
     conn = sqlite3.connect('shopee.db')
     df.to_sql('shopee', conn, if_exists='append', index=False)
+   
 
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+if __name__ == '__main__':
+    schedule.every(5).minutes.do(export_data)
+    
+    while True:
+        schedule.run_all()
+        print("running....")
+        time.sleep(1)
+    #print diganti dengan log
+    #bikin scheduling biar running tiap hari
+    #write seperti biasa log dibikin file baru(info)
