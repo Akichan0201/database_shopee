@@ -7,7 +7,6 @@ import pandas as pd
 import logging
 import numpy as np
 
-from dataclasses import dataclass, asdict
 
 def get_api(url):
     headers = {
@@ -24,7 +23,7 @@ def get_data():
     final_data = []
     # list of shop id
     shop_id = ['59763733', '809769142', '63983008']
-    ratings = [i for i in range(1, 6)] #[1,2,3,4,5]
+    ratings = [i for i in range(1, 6)]
     for shop in shop_id:
         for rate in ratings:
             data_per_rating = get_rating(shop, rate)
@@ -60,8 +59,6 @@ def get_rating(shop_id, ratings):
               ]
             print(product)
 
-            # convert data to dataframe
-            # export to sql
             conn = sqlite3.connect('shopee.db')
             df = pd.DataFrame(
                 np.array(product).reshape(-1, 8), columns=['orderid', 'itemid', 'userid', 'shopid', 'comment', 'rating_star', 'mtime', 'product'])
@@ -72,7 +69,6 @@ def get_rating(shop_id, ratings):
 
             time.sleep(2)
             offset += 6
-            # print('Offset:', offset)
 
             # DELETE FOR PROD
             if offset > 12:
@@ -109,35 +105,7 @@ def collect_data(response_api):
             logging.info(f'no data for today {date_now}')            
     return collected_data
     
-# def main():
-    
-#     data_json = get_data()
-#     data_shop = []
-    
-#     for i in data_json:
-
-#         product = Product(
-#             i['orderid'],
-#             i['itemid'],
-#             i['userid'],
-#             i['shopid'],
-#             i['comment'],
-#             i['rating_star'],
-#             i['mtime'],
-#             i['product_items'][0]['name']
-#         )
-        
-#         data_shop.append(product)
-#     return data_shop
 
 if __name__ == '__main__':
-    # logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
     get_data()
-
-    # schedule.every(5).minutes.do()
-    
-    # while True:
-    #     schedule.run_all()
-    #     print("running....")
-    #     time.sleep(1)

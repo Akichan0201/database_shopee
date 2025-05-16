@@ -160,6 +160,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+tutorial/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
@@ -175,7 +176,4 @@ cython_debug/
 .pypirc
 date.py
 beta.py
-learnsql.py
-dummy.py
-dummy.db
 *.html
