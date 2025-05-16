@@ -5,35 +5,18 @@ import time
 import sqlite3
 import pandas as pd
 import logging
+import numpy as np
 
 from dataclasses import dataclass, asdict
 
-logging.basicConfig(filename='main.log', level=logging.WARNING, format='%(asctime)s %(levelname)s:%(message)s')
-date_now = str(datetime.datetime.now().date())
-
-@dataclass
-class Product():
-    orderid: str
-    itemid: str
-    userid: str
-    shopid: str
-    comment: str
-    rating_star: int
-    mtime: str
-    product: str
-
-
 def get_api(url):
-    print(url)
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
     } 
     response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        logging.info(f'Get url from api {url}')
+    logging.info(f'Get {url} from api {response.status_code}')
 
     response.raise_for_status()
-    logging.info('Get data success')
     return response.json()
 
 def get_data():
@@ -49,7 +32,6 @@ def get_data():
             logging.info(f'Get data for rating {rate}')
     return final_data
 
-
 def get_rating(shop_id, ratings):
     offset = 0
     limit = 6
@@ -63,18 +45,40 @@ def get_rating(shop_id, ratings):
         api = get_api(f'{base_url}limit={limit}&offset={offset}&shopid={shop_id}&type={ratings}&userid=63984451')
         # validate
         try:
-            data = collect_data(api) 
-            final_res.extend(data)
+            data = collect_data(api)
+            print(len(data))
+            for i in data:
+              product = [
+                    i['orderid'],
+                    i['itemid'],
+                    i['userid'],
+                    i['shopid'],
+                    i['comment'],
+                    i['rating_star'],
+                    i['mtime'],
+                    i['product_items'][0]['name']
+              ]
+            print(product)
+
+            # convert data to dataframe
+            # export to sql
+            conn = sqlite3.connect('shopee.db')
+            df = pd.DataFrame(
+                np.array(product).reshape(-1, 8), columns=['orderid', 'itemid', 'userid', 'shopid', 'comment', 'rating_star', 'mtime', 'product'])
+            print(df)
+            
+            df.to_sql('shopee', conn, if_exists='append', index=False)
+            print("=================SUCESSS UPDATE DATA===========================")
 
             time.sleep(2)
             offset += 6
-            print('Offset:', offset)
+            # print('Offset:', offset)
 
             # DELETE FOR PROD
             if offset > 12:
                 status = False
-        except:
-            logging.info('No data')
+        except Exception as e:
+            logging.info(f'No data: {e}')
             status = False
     return final_res
 
@@ -87,7 +91,7 @@ def unix_converter(mtime):
         raise ValueError("Cant convert to datetime", e)
     
 def collect_data(response_api):
-
+    date_now = str(datetime.datetime.now().date())
     collected_data = []
     for i in response_api['data']['items']: 
         
@@ -98,52 +102,42 @@ def collect_data(response_api):
 
         if dt == date_now:
             collected_data.append(i)
-            logging.INFO(len(collected_data))
+            # print(collected_data)
+            logging.info(len(collected_data))
             
         else:
-            print(dt, date_now)
-            
+            logging.info(f'no data for today {date_now}')            
     return collected_data
     
-
-def main():
+# def main():
     
-    data_json = get_data()
-    data_shop = []
+#     data_json = get_data()
+#     data_shop = []
     
-    for i in data_json:
+#     for i in data_json:
 
-        product = Product(
-            i['orderid'],
-            i['itemid'],
-            i['userid'],
-            i['shopid'],
-            i['comment'],
-            i['rating_star'],
-            i['mtime'],
-            i['product_items'][0]['name']
-        )
+#         product = Product(
+#             i['orderid'],
+#             i['itemid'],
+#             i['userid'],
+#             i['shopid'],
+#             i['comment'],
+#             i['rating_star'],
+#             i['mtime'],
+#             i['product_items'][0]['name']
+#         )
         
-        data_shop.append(product)
-    return data_shop
-
-def export_data():
-    
-    shopee = main() # list of object
-    shopee = [asdict(item) for item in shopee]
-
-    df = pd.DataFrame(shopee)
-    conn = sqlite3.connect('shopee.db')
-    df.to_sql('shopee', conn, if_exists='append', index=False)
-   
+#         data_shop.append(product)
+#     return data_shop
 
 if __name__ == '__main__':
-    schedule.every(5).minutes.do(export_data)
+    # logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
+    get_data()
+
+    # schedule.every(5).minutes.do()
     
-    while True:
-        schedule.run_all()
-        print("running....")
-        time.sleep(1)
-    #print diganti dengan log
-    #bikin scheduling biar running tiap hari
-    #write seperti biasa log dibikin file baru(info)
+    # while True:
+    #     schedule.run_all()
+    #     print("running....")
+    #     time.sleep(1)
