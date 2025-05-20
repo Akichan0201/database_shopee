@@ -59,6 +59,7 @@ def get_rating(shop_id, ratings):
               ]
             print(product)
 
+            # UPDATE to DB
             conn = sqlite3.connect('shopee.db')
             df = pd.DataFrame(
                 np.array(product).reshape(-1, 8), columns=['orderid', 'itemid', 'userid', 'shopid', 'comment', 'rating_star', 'mtime', 'product'])
