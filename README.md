@@ -48,7 +48,7 @@ You can also schedule it to run in the background using a task scheduler or a ba
 
 ## Output
 - SQLite database shopee.db with daily records of product sales.
-- Tables include product name, brand, rating, sold count, and date.
+- Tables include product name, brand, rating, sold count, and date, but you can also keep all the data you got or just choose what you need.
 
 ---
 
