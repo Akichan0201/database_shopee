@@ -1,26 +1,55 @@
-# Scraping Multiple Marketplace Shopee
-====================================
-In here This project is a daily data scraper built to collect product and pricing information from multiple e-commerce markets.
-It automatically runs on a schedule, gathers the latest data, and exports everything into a local SQLite database.
+# Shopee Daily Sales Scraper
 
-*** Features
-Scrapes data from multiple e-commerce websites
+A Python-based scraper that collects product sales data from Shopee. It tracks sold counts daily and organizes data by rating, brand, and date. All data is stored in a local SQLite database for easy access and analysis.
 
-Automatically runs daily with scheduling
+## STAR Summary
 
-Stores collected data in a SQLite database
+**Situation:** Shopee does not offer direct access to structured daily sales data, making it difficult to monitor product trends over time.
 
-Uses logging to track scraping activity and errors
+**Task:** Develop an automated script that scrapes product information daily and saves it into a database for long-term tracking and analysis.
 
-Uses NumPy for efficient data processing
+**Action:**  
+- Collected product data using the Shopee public API through the `requests` module  
+- Processed and cleaned data with `pandas`, `datetime`, and `numpy`  
+- Stored daily product snapshots in an SQLite database  
+- Used the `schedule` module to automate daily scraping  
+- Added logging to monitor and debug the scraping process
 
-***Technologies used
-Python
+**Result:**  
+A functioning daily scraper that saves Shopee product sales data based on rating, brand, and date. Enables structured tracking and future analysis through the database.
 
-SQLite for lightweight database storage
+## Features
 
-NumPy for data handling
+- Tracks number of items sold on Shopee by day
+- Filters and organizes data by rating, brand, and date
+- Saves data in `shopee.db` using SQLite
+- Automates scraping with scheduling
+- Logs scraping activity for transparency
 
-Logging for tracking and debugging
+## How to Use
 
-Scheduling to automate daily scraping
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Akichan0201/database_shopee.git
+cd database_shopee
+```
+
+### 2. install dependencies
+```bash
+pip install requests pandas numpy schedule
+```
+
+### 3. Run the Script
+```bash
+python main.py
+```
+You can also schedule it to run in the background using a task scheduler or a background process.
+
+## Output
+- SQLite database shopee.db with daily records of product sales.
+- Tables include product name, brand, rating, sold count, and date.
+
+---
+
+Let me know if you'd like help adding visualization tools, database export to CSV, or a small dashboard interface.
