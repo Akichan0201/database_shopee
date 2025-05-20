@@ -1,4 +1,4 @@
-# Shopee Daily Sales Scraper
+# Database Shopee
 
 A Python-based scraper that collects product sales data from Shopee. It tracks sold counts daily and organizes data by rating, brand, and date. All data is stored in a local SQLite database for easy access and analysis.
 
