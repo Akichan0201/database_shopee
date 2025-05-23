@@ -27,9 +27,7 @@ def main():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
-    main()
-    # schedule.every(1).days.do(get_data)
-    # main()
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(3600)
+    schedule.every(1).days.do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(3600)
