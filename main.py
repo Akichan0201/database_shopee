@@ -2,6 +2,7 @@ import schedule
 import time 
 import logging
 import os
+import json
 
 from dotenv import load_dotenv
 
@@ -14,13 +15,14 @@ def main():
 
     load_dotenv()
     SHEET_ID = os.getenv("SHEET_ID")
-    SERVICE_ACC = 'credentials.json'
+    INFO = json.loads(os.getenv("INFO"))
 
     shop_id = ['59763733', '809769142', '63983008']
-    data = get_data(shop_id)
+    # data = get_data(shop_id)
     
-    sheet = service_account(SHEET_ID, SERVICE_ACC)
-    sheet.append_rows(data)
+    sheet = service_account(SHEET_ID, INFO)
+    # sheet.append_rows(data)
+    print(sheet.get_all_values())
 
 
 if __name__ == '__main__':

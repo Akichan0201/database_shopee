@@ -8,8 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the Python script into the container
-COPY test.py .
+# Copy all necessary Python scripts into the container
+COPY google_sheets.py main.py scraper.py .
 
-# Set the command to run the script
-CMD ["python", "test.py"]
+# Set the default command to run the main script
+CMD ["python", "main.py"]

@@ -96,10 +96,6 @@ def get_rating(shop_id,ratings):
 
             final_res.extend(data)
 
-            # DELETE FOR PRODUCTION
-            if offset > 12:
-                status = False
-
         except Exception as e:
             logging.error(f'No data: {e}')
             status = False
